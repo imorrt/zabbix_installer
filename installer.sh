@@ -10,10 +10,11 @@ repo="https://raw.githubusercontent.com/imorrt/zabbix_installer/master"
 helpmenu()
 {
         echo "         -h display helpmenu"
-        echo "         Usage: -m | --with-mysql - install with mysql userparams"
-        echo "                -a | --with-apache add ability to monitor apache"
-	echo "		      -ng | --with-nginx add ability to monitor nginx"
-        echo "                -n | --normal - install without any params"
+        echo "         Usage: -m | --mysql - install with mysql userparams"
+        echo "                -a | --apache add ability to monitor apache"
+	echo "		      -n | --nginx add ability to monitor nginx"
+        echo "                -i | --install - install without any params"
+	echo "		      -p | --php5-fpm - add ability to monitor php5-fpm"
 }
 
 
@@ -134,35 +135,6 @@ EOF
 	chmod +x zapache
 
 }
-#while :
-#do
-#    case "$1" in
-#        -m | --with-mysql)
-#                WithMysql
-#                exit 0
-#                ;;
-#        -h | --help)
-#                helpmenu
-#                exit 0
-#                ;;
-#        -n | --normal)
-#                Install
-#                exit 0
-#                ;;
-#	-a | --with-apache)
-#		WithApache
-#		exit 0
-#		;;
-#	-ng | --with-nginx)
-#		WithNginx
-#		exit 0
-#		;;
-#        *)
-#                break
-#    esac
-#done
-
-
 
 PARSED_OPTIONS=$(getopt -n "$0"  -o hinamp --long "help,install,nginx,apache,mysql,php5-fpm"  -- "$@")
 if [ $? -ne 0 ];
