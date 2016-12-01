@@ -21,54 +21,49 @@ Install()
 {
 		echo -n "Please enter ip of your zabbix server: "
 		read server
-		if [ -n $server ]; then
+				
+		cd /root/
+		wget http://repo.zabbix.com/zabbix/3.2/debian/pool/main/z/zabbix-release/zabbix-release_3.2-1+jessie_all.deb
+		dpkg -i zabbix-release_3.2-1+jessie_all.deb
+		apt-get update
+		apt-get install zabbix-agent
+
+	wget -O $pathScripts/ro-fs-test.sh $repo/ro-fs-test.sh
+
+		hashIdentity=`openssl rand -hex 16`
+		openssl rand -hex 32 > /etc/zabbix/zabbix_agent.psk
+		psk=`cat /etc/zabbix/zabbix_agent.psk`
+
+		mkdir /etc/zabbix/scripts
+		chown zabbix:zabbix $pathScripts
+
+		echo -n > $pathConf
+		echo "PidFile=/var/run/zabbix/zabbix_agentd.pid" >> $pathConf
+		echo "LogFile=/var/log/zabbix/zabbix_agentd.log" >> $pathConf
+		echo "EnableRemoteCommands=1" >> $pathConf
+		echo "Server=$server" >> $pathConf
+		echo "Hostname=$hostname" >> $pathConf
+		echo "AllowRoot=1" >> $pathConf
+		echo "UnsafeUserParameters=1" >> $pathConf
+		echo "TLSConnect=psk" >> $pathConf
+		echo "TLSAccept=psk" >> $pathConf
+		echo "TLSPSKFile=/etc/zabbix/zabbix_agent.psk" >> $pathConf
+		echo "TLSPSKIdentity=$hashIdentity" >> $pathConf
+		echo "Include=$userParams" >> $pathConf
+	touch $userParams
+
+
+	echo "UserParameter=readonlyfs,/etc/zabbix/scripts/ro-fs-test.sh" >> $userParams
+
+	/etc/init.d/zabbix-agent restart
+	/etc/init.d/zabbix-agent restart
+
+		echo
+		echo -ne "Path to config: $pathConf\n"
+		echo -ne "FOR ZABBIX SERVER\n"
+		echo -ne "PSK Identity = $hashIdentity\n"
+		echo -ne "PSK = $psk\n"
 		
-				
-				cd /root/
-				wget http://repo.zabbix.com/zabbix/3.2/debian/pool/main/z/zabbix-release/zabbix-release_3.2-1+jessie_all.deb
-				dpkg -i zabbix-release_3.2-1+jessie_all.deb
-				apt-get update
-				apt-get install zabbix-agent
-
-			wget -O $pathScripts/ro-fs-test.sh $repo/ro-fs-test.sh
-
-				hashIdentity=`openssl rand -hex 16`
-				openssl rand -hex 32 > /etc/zabbix/zabbix_agent.psk
-				psk=`cat /etc/zabbix/zabbix_agent.psk`
-
-				mkdir /etc/zabbix/scripts
-				chown zabbix:zabbix $pathScripts
-
-				echo -n > $pathConf
-				echo "PidFile=/var/run/zabbix/zabbix_agentd.pid" >> $pathConf
-				echo "LogFile=/var/log/zabbix/zabbix_agentd.log" >> $pathConf
-				echo "EnableRemoteCommands=1" >> $pathConf
-				echo "Server=$server" >> $pathConf
-				echo "Hostname=$hostname" >> $pathConf
-				echo "AllowRoot=1" >> $pathConf
-				echo "UnsafeUserParameters=1" >> $pathConf
-				echo "TLSConnect=psk" >> $pathConf
-				echo "TLSAccept=psk" >> $pathConf
-				echo "TLSPSKFile=/etc/zabbix/zabbix_agent.psk" >> $pathConf
-				echo "TLSPSKIdentity=$hashIdentity" >> $pathConf
-				echo "Include=$userParams" >> $pathConf
-			touch $userParams
-
-
-			echo "UserParameter=readonlyfs,/etc/zabbix/scripts/ro-fs-test.sh" >> $userParams
-
-			/etc/init.d/zabbix-agent restart
-			/etc/init.d/zabbix-agent restart
-
-				echo
-				echo -ne "Path to config: $pathConf\n"
-				echo -ne "FOR ZABBIX SERVER\n"
-				echo -ne "PSK Identity = $hashIdentity\n"
-				echo -ne "PSK = $psk\n"
-				
-		else
-			exit 0;
-		fi
 }
 
 WithMysql()
