@@ -82,7 +82,7 @@ WithNginx()
 {
         check=`nginx -V 2>&1 | grep -c with-http_stub_status_module`
         if [ "$check" -eq "1" ]; then
-                cd /etc/zabbix/scripts
+                cd $pathScripts
                 wget $repo/nginx-check.sh
 		chown zabbix:zabbix nginx-check.sh
 		chmod +x nginx-check.sh
@@ -126,7 +126,7 @@ EOF
 	echo 'UserParameter=apache[*],/etc/zabbix/scripts/zapache $1' >> $userParams
 
 	/etc/init.d/apache2 restart
-	cd /etc/zabbix/scripts/
+	cd $pathScripts
 	wget $repo/zapache
 	chown zabbix: zapache
 	chmod +x zapache
