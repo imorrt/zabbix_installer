@@ -12,9 +12,9 @@ helpmenu()
         echo "         -h display helpmenu"
         echo "         Usage: -m | --mysql - install with mysql userparams"
         echo "                -a | --apache add ability to monitor apache"
-	echo "		      -n | --nginx add ability to monitor nginx"
+	echo "                -n | --nginx add ability to monitor nginx"
         echo "                -i | --install - install without any params"
-	echo "		      -p | --php5-fpm - add ability to monitor php5-fpm"
+	echo "                -p | --php5-fpm - add ability to monitor php5-fpm"
 }
 
 
