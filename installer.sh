@@ -167,7 +167,7 @@ server {
 EOF
 	/etc/init.d/nginx restart
 	test=`curl -s http://localhost/status | grep -c pool`
-	if [ "$i" -eq 1 ];then
+	if [ "$test" -eq 1 ];then
 		echo "Template for php5-fpm monitor successfull installed"
 	else
 		echo "SOMETHING WRONG WITH php5-fpm!!"
