@@ -129,10 +129,49 @@ EOF
 	echo 'UserParameter=apache[*],/etc/zabbix/scripts/zapache $1' >> $userParams
 
 	/etc/init.d/apache2 restart
-	cd /etc/zabbix/scripts/
+	cd $pathScripts
 	wget $repo/zapache
 	chown zabbix: zapache
 	chmod +x zapache
+
+}
+
+WithPhp5-fpm()
+{
+	cd $pathScripts
+	wget $repo/php-fpm.sh > /dev/null 2>&1
+	chmod +x php-fpm.sh
+	chown zabbix:zabbix php-fpm.sh
+	
+	echo 'UserParameter=php-fpm.status[*],/etc/zabbix/scripts/php-fpm.sh $1'
+	
+	sed -i "s/;pm.status_path/pm.status_path/" /etc/php5/fpm/pool.d/www.conf
+	sed -i "s/;ping/ping/" /etc/php5/fpm/pool.d/www.conf
+	/etc/init.d/php5-fpm restart 
+cat << EOF > /etc/nginx/conf.d/php-fpm-status.conf
+server {
+    listen 80;
+    listen [::]:80;
+    server_name  localhost;
+		location ~ ^/(status|ping)$ {
+                access_log off;
+                allow 127.0.0.1;
+                allow ::1;
+                deny all;
+                include fastcgi_params;
+                fastcgi_pass unix:/var/run/php5-fpm.sock;
+                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        }
+}
+
+EOF
+	/etc/init.d/nginx restart
+	test=`curl -s http://localhost/status | grep -c pool`
+	if [ "$i" -eq 1 ];then
+		echo "Template for php5-fpm monitor successfull installed"
+	else
+		echo "SOMETHING WRONG WITH php5-fpm!!"
+	fi
 
 }
 
