@@ -163,7 +163,6 @@ server {
                 fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         }
 }
-
 EOF
 	/etc/init.d/nginx restart
 	test=`curl -s http://localhost/status | grep -c pool`
