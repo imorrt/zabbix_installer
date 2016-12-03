@@ -143,7 +143,7 @@ WithPhp5-fpm()
 	chmod +x php-fpm.sh
 	chown zabbix:zabbix php-fpm.sh
 	
-	echo 'UserParameter=php-fpm.status[*],/etc/zabbix/scripts/php-fpm.sh $1'
+	echo 'UserParameter=php-fpm.status[*],/etc/zabbix/scripts/php-fpm.sh $1' >> $userParams
 	
 	sed -i "s/;pm.status_path/pm.status_path/" /etc/php5/fpm/pool.d/www.conf
 	sed -i "s/;ping/ping/" /etc/php5/fpm/pool.d/www.conf
