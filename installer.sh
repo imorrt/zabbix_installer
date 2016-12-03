@@ -148,6 +148,7 @@ WithPhp5-fpm()
 	wget $repo/php-fpm.sh > /dev/null 2>&1
 	chmod +x php-fpm.sh
 	chown zabbix:zabbix php-fpm.sh
+	sed -i -e 's/\r$//' $pathScripts/php-fpm.sh
 	
 	echo 'UserParameter=php-fpm.status[*],/etc/zabbix/scripts/php-fpm.sh $1' >> $userParams
 	
