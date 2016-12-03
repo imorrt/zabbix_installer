@@ -1,11 +1,10 @@
 #!/bin/bash
-
 HOST="localhost"
 PORT="80"
 status="status"
 
 function query() {
-        curl -s http://${HOST}:${PORT}/${status}?xml | grep "$1" | awk -F'>|<' '{ print $3}'
+        curl -s http://${HOST}:${PORT}/${status}?xml | grep "<$1" | awk -F'>|<' '{ print $3}'
 }
 
 if [ $# == 0 ]; then
