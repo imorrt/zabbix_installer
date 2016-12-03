@@ -56,8 +56,8 @@ Install()
 
 	echo "UserParameter=readonlyfs,/etc/zabbix/scripts/ro-fs-test.sh" >> $userParams
 
-	/etc/init.d/zabbix-agent restart
-	/etc/init.d/zabbix-agent restart
+	/etc/init.d/zabbix-agent stop
+	/etc/init.d/zabbix-agent start
 
 		echo
 		echo -ne "Path to config: $pathConf\n"
@@ -77,6 +77,8 @@ WithMysql()
 
         chown zabbix:zabbix mysql_status.sh
         chmod +x mysql_status.sh
+	/etc/init.d/zabbix-agent stop
+	/etc/init.d/zabbix-agent start
 }
 
 
@@ -105,6 +107,8 @@ EOF
         else
                 echo 'OOOOOOPS!! Nginx configured without with-http_stub_status_module. Installation aborted'
         fi
+	/etc/init.d/zabbix-agent stop
+	/etc/init.d/zabbix-agent start	
 }
 
 
@@ -133,7 +137,9 @@ EOF
 	wget $repo/zapache
 	chown zabbix: zapache
 	chmod +x zapache
-
+	
+	/etc/init.d/zabbix-agent stop
+	/etc/init.d/zabbix-agent start
 }
 
 WithPhp5-fpm()
@@ -172,6 +178,8 @@ EOF
 		echo "SOMETHING WRONG WITH php5-fpm!!"
 	fi
 
+	/etc/init.d/zabbix-agent stop
+	/etc/init.d/zabbix-agent start
 }
 
 PARSED_OPTIONS=$(getopt -n "$0"  -o hinamp --long "help,install,nginx,apache,mysql,php5-fpm"  -- "$@")
