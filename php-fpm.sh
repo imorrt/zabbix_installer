@@ -1,4 +1,5 @@
 #!/bin/bash
+
 HOST="localhost"
 PORT="80"
 status="status"
