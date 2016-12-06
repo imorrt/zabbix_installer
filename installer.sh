@@ -28,8 +28,9 @@ Install()
 		dpkg -i zabbix-release_3.2-1+jessie_all.deb
 		apt-get update
 		apt-get install zabbix-agent
-
-	wget -O $pathScripts/ro-fs-test.sh $repo/ro-fs-test.sh
+		
+		cd $pathScripts
+		wget $repo/ro-fs-test.sh
 
 		hashIdentity=`openssl rand -hex 16`
 		openssl rand -hex 32 > /etc/zabbix/zabbix_agent.psk
