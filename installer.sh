@@ -29,9 +29,6 @@ Install()
 		apt-get update
 		apt-get install zabbix-agent
 		
-		cd $pathScripts
-		wget $repo/ro-fs-test.sh
-
 		hashIdentity=`openssl rand -hex 16`
 		openssl rand -hex 32 > /etc/zabbix/zabbix_agent.psk
 		psk=`cat /etc/zabbix/zabbix_agent.psk`
@@ -52,13 +49,15 @@ Install()
 		echo "TLSPSKFile=/etc/zabbix/zabbix_agent.psk" >> $pathConf
 		echo "TLSPSKIdentity=$hashIdentity" >> $pathConf
 		echo "Include=$userParams" >> $pathConf
-	touch $userParams
+		touch $userParams
 
+		cd $pathScripts
+		wget $repo/ro-fs-test.sh
 
-	echo "UserParameter=readonlyfs,/etc/zabbix/scripts/ro-fs-test.sh" >> $userParams
+		echo "UserParameter=readonlyfs,/etc/zabbix/scripts/ro-fs-test.sh" >> $userParams
 
-	/etc/init.d/zabbix-agent stop
-	/etc/init.d/zabbix-agent start
+		/etc/init.d/zabbix-agent stop
+		/etc/init.d/zabbix-agent start
 
 		echo
 		echo -ne "Path to config: $pathConf\n"
