@@ -198,7 +198,7 @@ do
       helpmenu
       shift;;
  
-    -i|--mysql)
+    -m|--mysql)
       WithMysql
       shift;;
  
