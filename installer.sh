@@ -205,22 +205,17 @@ do
       WithNginx
       shift;;
 	
-	-a|--apache)
-	  WithApache
-	  shift;;
-	-p|--php5-fpm)
-	  WithPhp5-fpm
-	  shift;;
+    -a|--apache)
+      WithApache
+      shift;;
+
+    -p|--php5-fpm)
+      WithPhp5-fpm
+      shift;;
 	  
     -i|--install)
       Install
 	  shift;;
-#      if [ -n "$2" ];
-#      then
-#        echo "You need to paste zabbix server ip after --install"
-#      fi
-#      shift 2;;
- 
     --)
       shift
       break;;
