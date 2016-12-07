@@ -64,7 +64,7 @@ Install()
 		echo -ne "FOR ZABBIX SERVER\n"
 		echo -ne "PSK Identity = $hashIdentity\n"
 		echo -ne "PSK = $psk\n"
-		
+		update-rc.d zabbix-agent defaults
 }
 
 WithMysql()
