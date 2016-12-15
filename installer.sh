@@ -53,7 +53,9 @@ Install()
 
 		cd $pathScripts
 		wget $repo/ro-fs-test.sh
-
+		chmod +x ro-fs-test.sh
+		chown zabbix:zabbix ro-fs-test.sh
+		
 		echo "UserParameter=readonlyfs,/etc/zabbix/scripts/ro-fs-test.sh" >> $userParams
 
 		/etc/init.d/zabbix-agent stop
