@@ -6,7 +6,7 @@ DATE_NOW=`date +"%s"`
 
 DATE_DIFF_MINUTES=$[ ($DATE_NOW - $DATE_APACHE) / 60 ]
 
-if [ $DATE_DIFF_MINUTES -gt 5 ]; then
+if [ $DATE_DIFF_MINUTES -gt 15 ]; then
     DO_ALERT=0
 else
         DO_ALERT=1
