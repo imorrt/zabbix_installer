@@ -12,9 +12,10 @@ helpmenu()
         echo "         -h display helpmenu"
         echo "         Usage: -m | --mysql - install with mysql userparams"
         echo "                -a | --apache add ability to monitor apache"
-	echo "                -n | --nginx add ability to monitor nginx"
+        echo "                -n | --nginx add ability to monitor nginx"
         echo "                -i | --install - install without any params"
-	echo "                -p | --php5-fpm - add ability to monitor php5-fpm"
+        echo "                -p | --php5-fpm - add ability to monitor php5-fpm"
+        echo "                -e | --elasticSearch - add ability to monitor ElasticSearch Cluster or Node"
 }
 
 
@@ -185,7 +186,20 @@ EOF
 	/etc/init.d/zabbix-agent start
 }
 
-PARSED_OPTIONS=$(getopt -n "$0"  -o hinamp --long "help,install,nginx,apache,mysql,php5-fpm"  -- "$@")
+WithElasticsearch()
+{
+	cd $pathScripts
+	wget $repo/Elasticsearch.py
+	chmod +x Elasticsearch.py
+	chown zabbix:zabbix Elasticsearch.py
+	echo 'UserParameter=ESzabbix[*],/etc/zabbix/scripts/Elasticsearch.py $1 $2' >> $userParams
+	
+	/etc/init.d/zabbix-agent stop
+	/etc/init.d/zabbix-agent start
+}
+
+
+PARSED_OPTIONS=$(getopt -n "$0"  -o hinampe --long "help,install,nginx,apache,mysql,php5-fpm,elasticSearch"  -- "$@")
 if [ $? -ne 0 ];
 then
   exit 1
@@ -198,7 +212,11 @@ do
     -h|--help)
       helpmenu
       shift;;
- 
+	  
+    -e|--elasticSearch)
+      WithElasticsearch
+      shift;;
+		
     -m|--mysql)
       WithMysql
       shift;;
