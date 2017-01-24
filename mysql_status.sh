@@ -36,6 +36,8 @@ case $1 in
     command $1 ;;
   Bytes_sent)
     command $1 ;;
+  Threads_connected)
+    command $1 ;;
   Uptime)
     command $1 ;;
   Version)
@@ -44,5 +46,5 @@ case $1 in
     $Mysqladmin ping | wc -l ;;
   *)
     echo "You asked for $1 - not supported;"
-    echo "Usage: $0 { Seconds_Behind_Master|Com_select|Com_insert|Com_update|Com_delete|Com_begin|Com_commit|Com_rollback|Questions|Slow_queries|Bytes_received|Bytes_sent|Ping|Uptime|Version }" ;;
+    echo "Usage: $0 { Seconds_Behind_Master|Threads_connected|Com_select|Com_insert|Com_update|Com_delete|Com_begin|Com_commit|Com_rollback|Questions|Slow_queries|Bytes_received|Bytes_sent|Ping|Uptime|Version }" ;;
 esac
