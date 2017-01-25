@@ -23,7 +23,7 @@ Install()
 {
 #		echo -n "Please enter ip of your zabbix server: "
 #		read server
-		server="$1"				
+				
 		cd /root/
 		wget http://repo.zabbix.com/zabbix/3.2/debian/pool/main/z/zabbix-release/zabbix-release_3.2-1+jessie_all.deb >/dev/null 2>&1
 		dpkg -i zabbix-release_3.2-1+jessie_all.deb >/dev/null 2>&1
@@ -41,7 +41,7 @@ Install()
 		echo "PidFile=/var/run/zabbix/zabbix_agentd.pid" >> $pathConf
 		echo "LogFile=/var/log/zabbix/zabbix_agentd.log" >> $pathConf
 		echo "EnableRemoteCommands=1" >> $pathConf
-		echo "Server=$server" >> $pathConf
+		echo "Server=$1" >> $pathConf
 		echo "Hostname=$hostname" >> $pathConf
 		echo "AllowRoot=1" >> $pathConf
 		echo "UnsafeUserParameters=1" >> $pathConf
