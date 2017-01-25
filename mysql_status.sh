@@ -15,6 +15,11 @@ SleepQueryCount(){
 $Mysqladmin processlist | grep Sleep | wc -l
 }
 
+SleepMaxTime(){
+$Mysqladmin processlist | grep linode | grep -v unauthenticated | grep Sleep | awk '{print $12}' | sort -n | tail -n1
+}
+
+
 case $1 in
   Seconds_Behind_Master)
     replication_check $1 ;;
@@ -22,6 +27,8 @@ case $1 in
     SleepQueryCount ;;
   Com_select)
     command $1 ;;
+  SleepMaxTime)
+    SleepMaxTime ;;
   Com_insert)
     command $1 ;;
   Com_update)
@@ -52,5 +59,5 @@ case $1 in
     $Mysqladmin ping | wc -l ;;
   *)
     echo "You asked for $1 - not supported;"
-    echo "Usage: $0 { Seconds_Behind_Master|SleepQueryCount|Threads_connected|Com_select|Com_insert|Com_update|Com_delete|Com_begin|Com_commit|Com_rollback|Questions|Slow_queries|Bytes_received|Bytes_sent|Ping|Uptime|Version }" ;;
+    echo "Usage: $0 { Seconds_Behind_Master|SleepMaxTime|SleepQueryCount|Threads_connected|Com_select|Com_insert|Com_update|Com_delete|Com_begin|Com_commit|Com_rollback|Questions|Slow_queries|Bytes_received|Bytes_sent|Ping|Uptime|Version }" ;;
 esac
