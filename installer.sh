@@ -26,7 +26,7 @@ Install()
 		server="$1"				
 		cd /root/
 		wget http://repo.zabbix.com/zabbix/3.2/debian/pool/main/z/zabbix-release/zabbix-release_3.2-1+jessie_all.deb >/dev/null 2>&1
-		dpkg -i zabbix-release_3.2-1+jessie_all.deb
+		dpkg -i zabbix-release_3.2-1+jessie_all.deb >/dev/null 2>&1
 		apt-get update 
 		apt-get install zabbix-agent
 		
@@ -53,7 +53,7 @@ Install()
 		touch $userParams
 
 		cd $pathScripts
-		wget $repo/ro-fs-test.sh
+		wget $repo/ro-fs-test.sh >/dev/null 2>&1
 		chmod +x ro-fs-test.sh
 		chown zabbix:zabbix ro-fs-test.sh
 		
