@@ -25,9 +25,9 @@ Install()
 #		read server
 		server=$1				
 		cd /root/
-		wget http://repo.zabbix.com/zabbix/3.2/debian/pool/main/z/zabbix-release/zabbix-release_3.2-1+jessie_all.deb
+		wget http://repo.zabbix.com/zabbix/3.2/debian/pool/main/z/zabbix-release/zabbix-release_3.2-1+jessie_all.deb >/dev/null 2>&1
 		dpkg -i zabbix-release_3.2-1+jessie_all.deb
-		apt-get update
+		apt-get update 
 		apt-get install zabbix-agent
 		
 		hashIdentity=`openssl rand -hex 16`
@@ -91,7 +91,7 @@ WithNginx()
         check=`nginx -V 2>&1 | grep -c with-http_stub_status_module`
         if [ "$check" -eq "1" ]; then
                 cd /etc/zabbix/scripts
-                wget $repo/nginx-check.sh
+                wget $repo/nginx-check.sh >/dev/null 2>&1
 		chown zabbix:zabbix nginx-check.sh
 		chmod +x nginx-check.sh
                 echo 'UserParameter=nginx[*],/etc/zabbix/scripts/nginx-check.sh "$1" "$2"' >> $userParams
@@ -137,7 +137,7 @@ EOF
 
 	/etc/init.d/apache2 restart
 	cd $pathScripts
-	wget $repo/zapache
+	wget $repo/zapache >/dev/null 2>&1
 	chown zabbix: zapache
 	chmod +x zapache
 	
@@ -189,7 +189,7 @@ EOF
 WithElasticsearch()
 {
 	cd $pathScripts
-	wget $repo/Elasticsearch.py
+	wget $repo/Elasticsearch.py >/dev/null 2>&1
 	chmod +x Elasticsearch.py
 	chown zabbix:zabbix Elasticsearch.py
 	echo 'UserParameter=ESzabbix[*],/etc/zabbix/scripts/Elasticsearch.py $1 $2' >> $userParams
