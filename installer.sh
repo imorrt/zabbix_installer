@@ -21,9 +21,9 @@ helpmenu()
 
 Install()
 {
-		echo -n "Please enter ip of your zabbix server: "
-		read server
-				
+#		echo -n "Please enter ip of your zabbix server: "
+#		read server
+		server=$1				
 		cd /root/
 		wget http://repo.zabbix.com/zabbix/3.2/debian/pool/main/z/zabbix-release/zabbix-release_3.2-1+jessie_all.deb
 		dpkg -i zabbix-release_3.2-1+jessie_all.deb
