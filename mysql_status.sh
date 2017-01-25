@@ -11,9 +11,15 @@ replication_check(){
    $Mysql -E -e "show slave status;" | grep "$1" | sed -e 's/.*: //g'
 }
 
+SleepQueryCount(){
+$Mysqladmin processlist | grep Sleep | wc -l
+}
+
 case $1 in
   Seconds_Behind_Master)
     replication_check $1 ;;
+  SleepQueryCount)
+    SleepQueryCount ;;
   Com_select)
     command $1 ;;
   Com_insert)
@@ -46,5 +52,5 @@ case $1 in
     $Mysqladmin ping | wc -l ;;
   *)
     echo "You asked for $1 - not supported;"
-    echo "Usage: $0 { Seconds_Behind_Master|Threads_connected|Com_select|Com_insert|Com_update|Com_delete|Com_begin|Com_commit|Com_rollback|Questions|Slow_queries|Bytes_received|Bytes_sent|Ping|Uptime|Version }" ;;
+    echo "Usage: $0 { Seconds_Behind_Master|SleepQueryCount|Threads_connected|Com_select|Com_insert|Com_update|Com_delete|Com_begin|Com_commit|Com_rollback|Questions|Slow_queries|Bytes_received|Bytes_sent|Ping|Uptime|Version }" ;;
 esac
