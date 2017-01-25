@@ -135,7 +135,7 @@ EOF
 
 	echo 'UserParameter=apache[*],/etc/zabbix/scripts/zapache $1' >> $userParams
 
-	/etc/init.d/apache2 restart
+	/etc/init.d/apache2 reload
 	cd $pathScripts
 	wget $repo/zapache >/dev/null 2>&1
 	chown zabbix: zapache
