@@ -16,7 +16,7 @@ helpmenu()
         echo "                -i | --install - install without any params"
         echo "                -p | --php5-fpm - add ability to monitor php5-fpm"
         echo "                -P | --php-fpm7 - add ability to monitor php7-fpm"
-	echo "                -e | --elasticSearch - add ability to monitor ElasticSearch Cluster or Node"
+        echo "                -e | --elasticSearch - add ability to monitor ElasticSearch Cluster or Node"
 }
 
 
@@ -158,7 +158,7 @@ WithPhp5-fpm()
 	
 	sed -i "s/;pm.status_path/pm.status_path/" /etc/php5/fpm/pool.d/www.conf
 	sed -i "s/;ping/ping/" /etc/php5/fpm/pool.d/www.conf
-	/etc/init.d/php5-fpm restart 
+	/etc/init.d/php5-fpm reload 
 cat << EOF > /etc/nginx/conf.d/php-fpm-status.conf
 server {
     listen 80;
@@ -175,7 +175,7 @@ server {
         }
 }
 EOF
-	/etc/init.d/nginx restart
+	/etc/init.d/nginx reload
 	test=`curl -s http://localhost/status | grep -c pool`
 	if [ "$test" -eq 1 ];then
 		echo "Template for php5-fpm monitor successfull installed"
@@ -200,7 +200,7 @@ WithPhp-fpm7()
 	
 	sed -i "s/;pm.status_path/pm.status_path/" /etc/php/7.0/fpm/pool.d/www.conf
 	sed -i "s/;ping/ping/" /etc/php/7.0/fpm/pool.d/www.conf
-	/etc/init.d/php7.0-fpm restart 
+	/etc/init.d/php7.0-fpm reload 
 cat << EOF > /etc/nginx/conf.d/php-fpm-status.conf
 server {
     listen 80;
@@ -217,7 +217,7 @@ server {
         }
 }
 EOF
-	/etc/init.d/nginx restart
+	/etc/init.d/nginx reload
 	test=`curl -s http://localhost/status | grep -c pool`
 	if [ "$test" -eq 1 ];then
 		echo "Template for php-fpm7.0 monitor successfull installed"
