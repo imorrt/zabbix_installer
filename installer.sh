@@ -107,7 +107,7 @@ server {
         }
 }
 EOF
-        /etc/init.d/nginx restart
+        /etc/init.d/nginx reload
         else
                 echo 'OOOOOOPS!! Nginx configured without with-http_stub_status_module. Installation aborted'
         fi
