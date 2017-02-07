@@ -15,7 +15,8 @@ helpmenu()
         echo "                -n | --nginx add ability to monitor nginx"
         echo "                -i | --install - install without any params"
         echo "                -p | --php5-fpm - add ability to monitor php5-fpm"
-        echo "                -e | --elasticSearch - add ability to monitor ElasticSearch Cluster or Node"
+        echo "                -P | --php-fpm7 - add ability to monitor php7-fpm"
+		echo "                -e | --elasticSearch - add ability to monitor ElasticSearch Cluster or Node"
 }
 
 
@@ -25,9 +26,9 @@ Install()
 		read server
 				
 		cd /root/
-		wget http://repo.zabbix.com/zabbix/3.2/debian/pool/main/z/zabbix-release/zabbix-release_3.2-1+jessie_all.deb >/dev/null 2>&1
-		dpkg -i zabbix-release_3.2-1+jessie_all.deb >/dev/null 2>&1
-		apt-get update 
+		wget http://repo.zabbix.com/zabbix/3.2/debian/pool/main/z/zabbix-release/zabbix-release_3.2-1+jessie_all.deb
+		dpkg -i zabbix-release_3.2-1+jessie_all.deb
+		apt-get update
 		apt-get install zabbix-agent
 		
 		hashIdentity=`openssl rand -hex 16`
@@ -53,7 +54,7 @@ Install()
 		touch $userParams
 
 		cd $pathScripts
-		wget $repo/ro-fs-test.sh >/dev/null 2>&1
+		wget $repo/ro-fs-test.sh
 		chmod +x ro-fs-test.sh
 		chown zabbix:zabbix ro-fs-test.sh
 		
@@ -91,7 +92,7 @@ WithNginx()
         check=`nginx -V 2>&1 | grep -c with-http_stub_status_module`
         if [ "$check" -eq "1" ]; then
                 cd /etc/zabbix/scripts
-                wget $repo/nginx-check.sh >/dev/null 2>&1
+                wget $repo/nginx-check.sh
 		chown zabbix:zabbix nginx-check.sh
 		chmod +x nginx-check.sh
                 echo 'UserParameter=nginx[*],/etc/zabbix/scripts/nginx-check.sh "$1" "$2"' >> $userParams
@@ -137,7 +138,7 @@ EOF
 
 	/etc/init.d/apache2 restart
 	cd $pathScripts
-	wget $repo/zapache >/dev/null 2>&1
+	wget $repo/zapache
 	chown zabbix: zapache
 	chmod +x zapache
 	
@@ -186,10 +187,52 @@ EOF
 	/etc/init.d/zabbix-agent start
 }
 
+
+WithPhp-fpm7()
+{
+	cd $pathScripts
+	wget $repo/php-fpm.sh > /dev/null 2>&1
+	chmod +x php-fpm.sh
+	chown zabbix:zabbix php-fpm.sh
+	sed -i -e 's/\r$//' $pathScripts/php-fpm.sh
+	
+	echo 'UserParameter=php-fpm.status[*],/etc/zabbix/scripts/php-fpm.sh $1' >> $userParams
+	
+	sed -i "s/;pm.status_path/pm.status_path/" /etc/php/7.0/fpm/pool.d/www.conf
+	sed -i "s/;ping/ping/" /etc/php/7.0/fpm/pool.d/www.conf
+	/etc/init.d/php7.0-fpm restart 
+cat << EOF > /etc/nginx/conf.d/php-fpm-status.conf
+server {
+    listen 80;
+    listen [::]:80;
+    server_name  localhost;
+		location ~ ^/(status|ping)$ {
+                access_log off;
+                allow 127.0.0.1;
+                allow ::1;
+                deny all;
+                include fastcgi_params;
+                fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
+                fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        }
+}
+EOF
+	/etc/init.d/nginx restart
+	test=`curl -s http://localhost/status | grep -c pool`
+	if [ "$test" -eq 1 ];then
+		echo "Template for php-fpm7.0 monitor successfull installed"
+	else
+		echo "SOMETHING WRONG WITH php-fpm7.0!!"
+	fi
+
+	/etc/init.d/zabbix-agent stop
+	/etc/init.d/zabbix-agent start
+}
+
 WithElasticsearch()
 {
 	cd $pathScripts
-	wget $repo/Elasticsearch.py >/dev/null 2>&1
+	wget $repo/Elasticsearch.py
 	chmod +x Elasticsearch.py
 	chown zabbix:zabbix Elasticsearch.py
 	echo 'UserParameter=ESzabbix[*],/etc/zabbix/scripts/Elasticsearch.py $1 $2' >> $userParams
@@ -199,7 +242,7 @@ WithElasticsearch()
 }
 
 
-PARSED_OPTIONS=$(getopt -n "$0"  -o hinampe --long "help,install,nginx,apache,mysql,php5-fpm,elasticSearch"  -- "$@")
+PARSED_OPTIONS=$(getopt -n "$0"  -o hinampeP --long "help,install,nginx,apache,mysql,php5-fpm,elasticSearch,php-fpm7"  -- "$@")
 if [ $? -ne 0 ];
 then
   exit 1
@@ -231,6 +274,10 @@ do
 
     -p|--php5-fpm)
       WithPhp5-fpm
+      shift;;
+	  
+    -P|--php-fpm7)
+      WithPhp-fpm7
       shift;;
 	  
     -i|--install)
