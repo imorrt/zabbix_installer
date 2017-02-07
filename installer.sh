@@ -16,7 +16,7 @@ helpmenu()
         echo "                -i | --install - install without any params"
         echo "                -p | --php5-fpm - add ability to monitor php5-fpm"
         echo "                -P | --php-fpm7 - add ability to monitor php7-fpm"
-		echo "                -e | --elasticSearch - add ability to monitor ElasticSearch Cluster or Node"
+	echo "                -e | --elasticSearch - add ability to monitor ElasticSearch Cluster or Node"
 }
 
 
