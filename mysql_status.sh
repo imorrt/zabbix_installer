@@ -11,6 +11,15 @@ replication_check(){
    $Mysql -E -e "show slave status;" | grep "$1" | sed -e 's/.*: //g'
 }
 
+replication_check_null(){
+   check=`$Mysql -E -e "show slave status;" | grep "$1" | sed -e 's/.*: //g'`
+   if [[ $check == "NULL" ]]; then
+		echo 1
+   else
+		echo 0
+   fi
+}
+
 SleepQueryCount(){
 $Mysqladmin processlist | grep Sleep | wc -l
 }
@@ -23,6 +32,8 @@ $Mysqladmin processlist | grep linode | grep -v unauthenticated | grep Sleep | a
 case $1 in
   Seconds_Behind_Master)
     replication_check $1 ;;
+  Seconds_Behind_Master_is_Null)
+    replication_check_null $1 ;;
   SleepQueryCount)
     SleepQueryCount ;;
   Com_select)
@@ -59,5 +70,5 @@ case $1 in
     $Mysqladmin ping | wc -l ;;
   *)
     echo "You asked for $1 - not supported;"
-    echo "Usage: $0 { Seconds_Behind_Master|SleepMaxTime|SleepQueryCount|Threads_connected|Com_select|Com_insert|Com_update|Com_delete|Com_begin|Com_commit|Com_rollback|Questions|Slow_queries|Bytes_received|Bytes_sent|Ping|Uptime|Version }" ;;
+    echo "Usage: $0 { Seconds_Behind_Master_is_Null|Seconds_Behind_Master|SleepMaxTime|SleepQueryCount|Threads_connected|Com_select|Com_insert|Com_update|Com_delete|Com_begin|Com_commit|Com_rollback|Questions|Slow_queries|Bytes_received|Bytes_sent|Ping|Uptime|Version }" ;;
 esac
