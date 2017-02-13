@@ -10,6 +10,7 @@ if [ "$check" -eq 0 ];
 then
 	wget -O $pathScripts/ro-fs-test.sh $repo/ro-fs-test.sh > /dev/null 2>&1
 	echo "UserParameter=readonlyfs,/etc/zabbix/scripts/ro-fs-test.sh" >> $userParams
+	chown zabbix:zabbix $pathScripts/ro-fs-test.sh 
 	/etc/init.d/zabbix-agent stop
 	/etc/init.d/zabbix-agent start
 	echo "COMPLETE"
