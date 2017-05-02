@@ -1,5 +1,5 @@
 #!/bin/bash
-#made by imort
+#created by imort
 
 pathScripts="/etc/zabbix/scripts"
 hostname=`hostname`
@@ -233,10 +233,10 @@ EOF
 WithElasticsearch()
 {
 	cd $pathScripts
-	wget $repo/Elasticsearch.py
-	chmod +x Elasticsearch.py
-	chown zabbix:zabbix Elasticsearch.py
-	echo 'UserParameter=ESzabbix[*],/etc/zabbix/scripts/Elasticsearch.py $1 $2' >> $userParams
+	wget $repo/elasticsearch.sh
+	chmod +x elasticsearch.sh
+	chown zabbix:zabbix elasticsearch.sh
+	echo 'UserParameter=es[*],/etc/zabbix/scripts/elasticsearch.sh $1' >> $userParams
 	
 	/etc/init.d/zabbix-agent stop
 	/etc/init.d/zabbix-agent start
