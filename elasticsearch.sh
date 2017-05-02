@@ -14,7 +14,7 @@ fi
 }
 
 Unassigned(){
-curl -s -XGET 'http://127.0.0.1:9200/_cat/shards?v' | grep -c UNASSIGNED
+curl -s -XGET 'http://${HOST}:9200/_cat/shards?v' | grep -c UNASSIGNED
 }
 
 case $1 in
