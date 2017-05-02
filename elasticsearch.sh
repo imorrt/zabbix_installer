@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HOST="192.168.203.114"
+HOST=""
 
 ClusterHealth(){
 CHECK=`curl -s -XGET 'http://${HOST}:9200/_cluster/health?pretty=true' | grep status | awk '{print $3}' | cut -d"\"" -f2`
