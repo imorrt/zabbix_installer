@@ -43,6 +43,7 @@ Install()
 		echo "LogFile=/var/log/zabbix/zabbix_agentd.log" >> $pathConf
 		echo "EnableRemoteCommands=1" >> $pathConf
 		echo "Server=$server" >> $pathConf
+		echo "Timeout=30" >> $pathConf
 		echo "Hostname=$hostname" >> $pathConf
 		echo "AllowRoot=1" >> $pathConf
 		echo "UnsafeUserParameters=1" >> $pathConf
