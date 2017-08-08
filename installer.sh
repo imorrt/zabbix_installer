@@ -59,7 +59,9 @@ Install()
 		chown zabbix:zabbix ro-fs-test.sh
 		
 		echo "UserParameter=readonlyfs,/etc/zabbix/scripts/ro-fs-test.sh" >> $userParams
-
+		echo "UserParameter=apt.security,apt-get -s upgrade | grep -ci ^inst.*security"
+		echo "UserParameter=apt.updates,apt-get -s upgrade | grep -iPc '^Inst((?!security).)*$'"
+		
 		/etc/init.d/zabbix-agent stop
 		/etc/init.d/zabbix-agent start
 
