@@ -62,6 +62,8 @@ Install()
 		echo "UserParameter=readonlyfs,/etc/zabbix/scripts/ro-fs-test.sh" >> $userParams
 		echo "UserParameter=apt.security,apt-get -s upgrade | grep -ci ^inst.*security"
 		echo "UserParameter=apt.updates,apt-get -s upgrade | grep -iPc '^Inst((?!security).)*$'"
+		echo "APT::Periodic::Enable "1";" >> /etc/apt/apt.conf.d/02periodic
+		echo "APT::Periodic::Update-Package-Lists "1";"  >> /etc/apt/apt.conf.d/02periodic
 		
 		/etc/init.d/zabbix-agent stop
 		/etc/init.d/zabbix-agent start
