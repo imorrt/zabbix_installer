@@ -1,89 +1,296 @@
 #!/bin/bash
-#made by imort
+#created by imort
 
-Mysql='/usr/bin/mysql --defaults-file=/root/.my.cnf'
-Mysqladmin='/usr/bin/mysqladmin --defaults-file=/root/.my.cnf'
+pathScripts="/etc/zabbix/scripts"
+hostname=`hostname`
+pathConf="/etc/zabbix/zabbix_agentd.conf"
+userParams="/etc/zabbix/zabbix_agentd.d/userparams.conf"
+repo="https://raw.githubusercontent.com/imorrt/zabbix_installer/master"
 
-command(){
-   $Mysql -e "show global status" | awk '$1 ~ /'"$1"'$/ {print $2}'
-}
-
-replication_check(){
-   $Mysql -E -e "show slave status;" | grep "$1" | sed -e 's/.*: //g'
-}
-
-replication_check_null(){
-   check=`$Mysql -E -e "show slave status;" | grep "$1" | sed -e 's/.*: //g'`
-   if [[ $check == "NULL" ]]; then
-		echo 1
-   else
-		echo 0
-   fi
-}
-rep_run_state_wfsw(){
-	$Mysql -E -e "show slave status;" | grep Slave_SQL_Running_State | cut -d: -f2 | grep -c "Waiting for Slave Worker"
-}
-rep_run_state_wfswtrp(){
-		$Mysql -E -e "show slave status;" | grep Slave_SQL_Running_State | cut -d: -f2 | grep -c "Waiting for Slave Worker to release partition"
-}
-syslock(){
-	$Mysql -e "select count(*) AS \`count\`  from performance_schema.threads where name like '%slave_worker' AND processlist_state='system lock'\G" | grep count |cut -d: -f2
-}
-SleepQueryCount(){
-$Mysqladmin processlist | grep Sleep | wc -l
-}
-
-SleepMaxTime(){
-$Mysqladmin processlist | grep linode | grep -v unauthenticated | grep Sleep | awk '{print $12}' | sort -n | tail -n1
+helpmenu()
+{
+        echo "         -h display helpmenu"
+        echo "         Usage: -m | --mysql - install with mysql userparams"
+        echo "                -a | --apache add ability to monitor apache"
+        echo "                -n | --nginx add ability to monitor nginx"
+        echo "                -i | --install - install without any params"
+        echo "                -p | --php5-fpm - add ability to monitor php5-fpm"
+        echo "                -P | --php-fpm7 - add ability to monitor php7-fpm"
+        echo "                -e | --elasticSearch - add ability to monitor ElasticSearch Cluster or Node"
 }
 
 
-case $1 in
-  Seconds_Behind_Master)
-    replication_check $1 ;;
-  Seconds_Behind_Master_is_Null)
-    replication_check_null $1 ;;
-  SleepQueryCount)
-    SleepQueryCount ;;
-  Com_select)
-    command $1 ;;
-  rep_run_state_wfsw)
-    rep_run_state_wfsw $1 ;;	  
-  rep_run_state_wfswtrp)
-    rep_run_state_wfswtrp $1 ;;
-  syslock)
-    syslock $1 ;;
-  SleepMaxTime)
-    SleepMaxTime ;;
-  Com_insert)
-    command $1 ;;
-  Com_update)
-    command $1 ;;
-  Com_delete)
-    command $1 ;;
-  Com_begin)
-    command $1 ;;
-  Com_commit)
-    command $1 ;;
-  Com_rollback)
-    command $1 ;;
-  Questions)
-    command $1 ;;
-  Slow_queries)
-    command $1 ;;
-  Bytes_received)
-    command $1 ;;
-  Bytes_sent)
-    command $1 ;;
-  Threads_connected)
-    command $1 ;;
-  Uptime)
-    command $1 ;;
-  Version)
-    $Mysql -V | awk -F '[ ,]' '{print $6}' ;;
-  Ping)
-    $Mysqladmin ping | wc -l ;;
-  *)
-    echo "You asked for $1 - not supported;"
-    echo "Usage: $0 { Seconds_Behind_Master_is_Null|Seconds_Behind_Master|SleepMaxTime|SleepQueryCount|Threads_connected|Com_select|Com_insert|Com_update|Com_delete|Com_begin|Com_commit|Com_rollback|Questions|Slow_queries|Bytes_received|Bytes_sent|Ping|Uptime|Version }" ;;
-esac
+Install()
+{
+		echo -n "Please enter ip of your zabbix server: "
+		read server
+				
+		cd /root/
+		wget http://repo.zabbix.com/zabbix/3.2/debian/pool/main/z/zabbix-release/zabbix-release_3.2-1+jessie_all.deb
+		dpkg -i zabbix-release_3.2-1+jessie_all.deb
+		apt-get update
+		apt-get install zabbix-agent
+		
+		hashIdentity=`openssl rand -hex 16`
+		openssl rand -hex 32 > /etc/zabbix/zabbix_agent.psk
+		psk=`cat /etc/zabbix/zabbix_agent.psk`
+
+		mkdir /etc/zabbix/scripts
+		chown zabbix:zabbix $pathScripts
+
+		echo -n > $pathConf
+		echo "PidFile=/var/run/zabbix/zabbix_agentd.pid" >> $pathConf
+		echo "LogFile=/var/log/zabbix/zabbix_agentd.log" >> $pathConf
+		echo "EnableRemoteCommands=1" >> $pathConf
+		echo "Server=$server" >> $pathConf
+		echo "Timeout=30" >> $pathConf
+		echo "Hostname=$hostname" >> $pathConf
+		echo "AllowRoot=1" >> $pathConf
+		echo "UnsafeUserParameters=1" >> $pathConf
+		echo "TLSConnect=psk" >> $pathConf
+		echo "TLSAccept=psk" >> $pathConf
+		echo "TLSPSKFile=/etc/zabbix/zabbix_agent.psk" >> $pathConf
+		echo "TLSPSKIdentity=$hashIdentity" >> $pathConf
+		echo "Include=$userParams" >> $pathConf
+		touch $userParams
+
+		cd $pathScripts
+		wget $repo/ro-fs-test.sh
+		chmod +x ro-fs-test.sh
+		chown zabbix:zabbix ro-fs-test.sh
+		
+		echo "UserParameter=readonlyfs,/etc/zabbix/scripts/ro-fs-test.sh" >> $userParams
+		echo "UserParameter=apt.security,apt-get -s upgrade | grep -ci ^inst.*security" >> $userParams
+		echo "UserParameter=apt.updates,apt-get -s upgrade | grep -iPc '^Inst((?!security).)*$'" >> $userParams
+		echo "APT::Periodic::Enable \"1\";" >> /etc/apt/apt.conf.d/02periodic
+		echo "APT::Periodic::Update-Package-Lists \"1\";"  >> /etc/apt/apt.conf.d/02periodic
+		
+		/etc/init.d/zabbix-agent stop
+		/etc/init.d/zabbix-agent start
+
+		echo
+		echo -ne "Path to config: $pathConf\n"
+		echo -ne "FOR ZABBIX SERVER\n"
+		echo -ne "PSK Identity = $hashIdentity\n"
+		echo -ne "PSK = $psk\n"
+		update-rc.d zabbix-agent defaults
+		systemctl enable zabbix-agent
+}
+
+WithMysql()
+{
+        cd $pathScripts
+        wget $repo/mysql_status.sh >/dev/null 2>&1
+        echo 'UserParameter=mysql.status[*],/etc/zabbix/scripts/mysql_status.sh $1' >> $userParams
+        echo 'UserParameter=mysql.ping,/etc/zabbix/scripts/mysql_status.sh Ping' >> $userParams
+        echo 'UserParameter=mysql.version,/etc/zabbix/scripts/mysql_status.sh Version' >> $userParams
+
+        chown zabbix:zabbix mysql_status.sh
+        chmod +x mysql_status.sh
+	/etc/init.d/zabbix-agent stop
+	/etc/init.d/zabbix-agent start
+}
+
+
+
+WithNginx()
+{
+        check=`nginx -V 2>&1 | grep -c with-http_stub_status_module`
+        if [ "$check" -eq "1" ]; then
+                cd /etc/zabbix/scripts
+                wget $repo/nginx-check.sh
+		chown zabbix:zabbix nginx-check.sh
+		chmod +x nginx-check.sh
+                echo 'UserParameter=nginx[*],/etc/zabbix/scripts/nginx-check.sh "$1" "$2"' >> $userParams
+cat << EOF > /etc/nginx/conf.d/nginx_status.conf
+server {
+        listen 10061;
+        location /nginx_status {
+        stub_status on;
+        access_log off;
+        allow 127.0.0.1;
+        deny all;
+        }
+}
+EOF
+        /etc/init.d/nginx reload
+        else
+                echo 'OOOOOOPS!! Nginx configured without with-http_stub_status_module. Installation aborted'
+        fi
+	/etc/init.d/zabbix-agent stop
+	/etc/init.d/zabbix-agent start	
+}
+
+
+WithApache()
+{
+	a2enmod status
+cat << EOF > /etc/apache2/mods-available/status.conf
+<IfModule mod_status.c>	
+	<Location /server-status>
+        	SetHandler server-status
+       		Allow from 127.0.0.1 ::1
+        	Order deny,allow
+        	Deny from all
+	</Location>
+	ExtendedStatus On
+       	<IfModule mod_proxy.c>
+               	ProxyStatus On
+        </IfModule>
+</IfModule>
+EOF
+
+	echo 'UserParameter=apache[*],/etc/zabbix/scripts/zapache $1' >> $userParams
+
+	/etc/init.d/apache2 restart
+	cd $pathScripts
+	wget $repo/zapache
+	chown zabbix: zapache
+	chmod +x zapache
+	
+	/etc/init.d/zabbix-agent stop
+	/etc/init.d/zabbix-agent start
+}
+
+WithPhp5-fpm()
+{
+	cd $pathScripts
+	wget $repo/php-fpm.sh > /dev/null 2>&1
+	chmod +x php-fpm.sh
+	chown zabbix:zabbix php-fpm.sh
+	sed -i -e 's/\r$//' $pathScripts/php-fpm.sh
+	
+	echo 'UserParameter=php-fpm.status[*],/etc/zabbix/scripts/php-fpm.sh $1' >> $userParams
+	
+	sed -i "s/;pm.status_path/pm.status_path/" /etc/php5/fpm/pool.d/www.conf
+	sed -i "s/;ping/ping/" /etc/php5/fpm/pool.d/www.conf
+	/etc/init.d/php5-fpm reload 
+cat << EOF > /etc/nginx/conf.d/php-fpm-status.conf
+server {
+    listen 80;
+    listen [::]:80;
+    server_name  localhost;
+		location ~ ^/(status|ping)$ {
+                access_log off;
+                allow 127.0.0.1;
+                allow ::1;
+                deny all;
+                include fastcgi_params;
+                fastcgi_pass unix:/var/run/php5-fpm.sock;
+                fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        }
+}
+EOF
+	/etc/init.d/nginx reload
+	test=`curl -s http://localhost/status | grep -c pool`
+	if [ "$test" -eq 1 ];then
+		echo "Template for php5-fpm monitor successfull installed"
+	else
+		echo "SOMETHING WRONG WITH php5-fpm!!"
+	fi
+
+	/etc/init.d/zabbix-agent stop
+	/etc/init.d/zabbix-agent start
+}
+
+
+WithPhp-fpm7()
+{
+	cd $pathScripts
+	wget $repo/php-fpm.sh > /dev/null 2>&1
+	chmod +x php-fpm.sh
+	chown zabbix:zabbix php-fpm.sh
+	sed -i -e 's/\r$//' $pathScripts/php-fpm.sh
+	
+	echo 'UserParameter=php-fpm.status[*],/etc/zabbix/scripts/php-fpm.sh $1' >> $userParams
+	
+	sed -i "s/;pm.status_path/pm.status_path/" /etc/php/7.0/fpm/pool.d/www.conf
+	sed -i "s/;ping/ping/" /etc/php/7.0/fpm/pool.d/www.conf
+	/etc/init.d/php7.0-fpm reload 
+cat << EOF > /etc/nginx/conf.d/php-fpm-status.conf
+server {
+    listen 80;
+    listen [::]:80;
+    server_name  localhost;
+		location ~ ^/(status|ping)$ {
+                access_log off;
+                allow 127.0.0.1;
+                allow ::1;
+                deny all;
+                include fastcgi_params;
+                fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
+                fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        }
+}
+EOF
+	/etc/init.d/nginx reload
+	test=`curl -s http://localhost/status | grep -c pool`
+	if [ "$test" -eq 1 ];then
+		echo "Template for php-fpm7.0 monitor successfull installed"
+	else
+		echo "SOMETHING WRONG WITH php-fpm7.0!!"
+	fi
+
+	/etc/init.d/zabbix-agent stop
+	/etc/init.d/zabbix-agent start
+}
+
+WithElasticsearch()
+{
+	cd $pathScripts
+	wget $repo/elasticsearch.sh
+	chmod +x elasticsearch.sh
+	chown zabbix:zabbix elasticsearch.sh
+	echo 'UserParameter=es[*],/etc/zabbix/scripts/elasticsearch.sh $1' >> $userParams
+	
+	/etc/init.d/zabbix-agent stop
+	/etc/init.d/zabbix-agent start
+}
+
+
+PARSED_OPTIONS=$(getopt -n "$0"  -o hinampeP --long "help,install,nginx,apache,mysql,php5-fpm,elasticSearch,php-fpm7"  -- "$@")
+if [ $? -ne 0 ];
+then
+  exit 1
+fi
+eval set -- "$PARSED_OPTIONS"
+while true;
+do
+  case "$1" in
+ 
+    -h|--help)
+      helpmenu
+      shift;;
+	  
+    -e|--elasticSearch)
+      WithElasticsearch
+      shift;;
+		
+    -m|--mysql)
+      WithMysql
+      shift;;
+ 
+    -n|--nginx)
+      WithNginx
+      shift;;
+	
+    -a|--apache)
+      WithApache
+      shift;;
+
+    -p|--php5-fpm)
+      WithPhp5-fpm
+      shift;;
+	  
+    -P|--php-fpm7)
+      WithPhp-fpm7
+      shift;;
+	  
+    -i|--install)
+      Install
+	  shift;;
+    --)
+      shift
+      break;;
+  esac
+done
