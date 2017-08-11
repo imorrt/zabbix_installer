@@ -1,4 +1,5 @@
 #!/bin/bash
+#made by imort
 
 Mysql='/usr/bin/mysql --defaults-file=/root/.my.cnf'
 Mysqladmin='/usr/bin/mysqladmin --defaults-file=/root/.my.cnf'
@@ -19,7 +20,15 @@ replication_check_null(){
 		echo 0
    fi
 }
-
+rep_run_state_wfsw(){
+	$Mysql -E -e "show slave status;" | grep Slave_SQL_Running_State | cut -d: -f2 | grep -c "Waiting for Slave Worker"
+}
+rep_run_state_wfswtrp(){
+		$Mysql -E -e "show slave status;" | grep Slave_SQL_Running_State | cut -d: -f2 | grep -c "Waiting for Slave Worker to release partition"
+}
+syslock(){
+	$Mysql -e "select count(*) AS \`count\`  from performance_schema.threads where name like '%slave_worker' AND processlist_state='system lock'\G" | grep count |cut -d: -f2
+}
 SleepQueryCount(){
 $Mysqladmin processlist | grep Sleep | wc -l
 }
@@ -38,6 +47,12 @@ case $1 in
     SleepQueryCount ;;
   Com_select)
     command $1 ;;
+  rep_run_state_wfsw)
+    rep_run_state_wfsw $1 ;;	  
+  rep_run_state_wfswtrp)
+    rep_run_state_wfswtrp $1 ;;
+  syslock)
+    syslock $1 ;;
   SleepMaxTime)
     SleepMaxTime ;;
   Com_insert)
