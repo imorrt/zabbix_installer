@@ -82,12 +82,15 @@ RabbitMQ()
 {
     cd $pathScripts
     wget $repo/detect_rabbitmq_nodes.sh >/dev/null 2>&1
+    wget $repo/rabbitmq-status.sh >/dev/null 2>&1
     echo 'UserParameter=rabbitmq.discovery,/etc/zabbix/scripts/detect_rabbitmq_nodes.sh' >> $userParams
     echo 'UserParameter=rabbitmq.discovery_queue,/etc/zabbix/scripts/detect_rabbitmq_nodes.sh queue' >> $userParams
     echo 'UserParameter=rabbitmq.discovery_exchanges,/etc/zabbix/scripts/detect_rabbitmq_nodes.sh exchange' >> $userParams
     echo 'UserParameter=rabbitmq[*],/etc/zabbix/scripts/rabbitmq-status.sh $1 $2 $3 $4' >> $userParams
     chown zabbix:zabbix detect_rabbitmq_nodes.sh
     chmod +x detect_rabbitmq_nodes.sh
+    chown zabbix:zabbix rabbitmq-status.sh
+    chmod +x rabbitmq-status.sh
     /etc/init.d/zabbix-agent stop
     /etc/init.d/zabbix-agent start
 }
