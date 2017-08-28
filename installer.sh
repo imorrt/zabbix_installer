@@ -18,6 +18,7 @@ helpmenu()
         echo "                -P | --php-fpm7 - add ability to monitor php7-fpm"
         echo "                -e | --elasticSearch - add ability to monitor ElasticSearch Cluster or Node"
         echo "                -r | --rabbitmq - add ability to monitor RabbitMQ"      
+        echo "                -x | --postfix - add ability to monitor postfix queue"
 }
 
 
@@ -78,19 +79,28 @@ Install()
         systemctl enable zabbix-agent
 }
 
+Postfix()
+{
+    echo "UserParameter=postfix.queue,   mailq | awk '/Request./ {print \$5}'" >> $userParams
+    echo 'UserParameter=postfix.maildrop,find /var/spool/postfix/maildrop -type f | wc -l' >> $userParams
+    echo 'UserParameter=postfix.deferred,find /var/spool/postfix/deferred -type f | wc -l' >> $userParams
+    echo 'UserParameter=postfix.incoming,find /var/spool/postfix/incoming -type f | wc -l' >> $userParams
+    echo 'UserParameter=postfix.active,  find /var/spool/postfix/active -type f | wc -l' >> $userParams
+    /etc/init.d/zabbix-agent stop
+    /etc/init.d/zabbix-agent start
+
+}
+
 RabbitMQ()
 {
     cd $pathScripts
     wget $repo/detect_rabbitmq_nodes.sh >/dev/null 2>&1
-    wget $repo/rabbitmq-status.sh >/dev/null 2>&1
     echo 'UserParameter=rabbitmq.discovery,/etc/zabbix/scripts/detect_rabbitmq_nodes.sh' >> $userParams
     echo 'UserParameter=rabbitmq.discovery_queue,/etc/zabbix/scripts/detect_rabbitmq_nodes.sh queue' >> $userParams
     echo 'UserParameter=rabbitmq.discovery_exchanges,/etc/zabbix/scripts/detect_rabbitmq_nodes.sh exchange' >> $userParams
     echo 'UserParameter=rabbitmq[*],/etc/zabbix/scripts/rabbitmq-status.sh $1 $2 $3 $4' >> $userParams
     chown zabbix:zabbix detect_rabbitmq_nodes.sh
     chmod +x detect_rabbitmq_nodes.sh
-    chown zabbix:zabbix rabbitmq-status.sh
-    chmod +x rabbitmq-status.sh
     /etc/init.d/zabbix-agent stop
     /etc/init.d/zabbix-agent start
 }
@@ -264,7 +274,7 @@ WithElasticsearch()
 }
 
 
-PARSED_OPTIONS=$(getopt -n "$0"  -o hinampePr --long "help,install,nginx,apache,mysql,php5-fpm,elasticSearch,php-fpm7,rabbitmq"  -- "$@")
+PARSED_OPTIONS=$(getopt -n "$0"  -o hinampePrx --long "help,install,nginx,apache,mysql,php5-fpm,elasticSearch,php-fpm7,rabbitmq,postfix"  -- "$@")
 if [ $? -ne 0 ];
 then
   exit 1
@@ -303,6 +313,10 @@ do
       shift;;
             
     -r|--rabbitmq)
+      RabbitMQ
+      shift;;
+            
+    -x|--postfix)
       RabbitMQ
       shift;;
 
