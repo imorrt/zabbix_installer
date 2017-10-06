@@ -4,7 +4,12 @@
 pathScripts="/etc/zabbix/scripts"
 hostname=`hostname`
 pathConf="/etc/zabbix/zabbix_agentd.conf"
-userParams="/etc/zabbix/zabbix_agentd.d/userparams.conf"
+checkOS=`cat /etc/issue | awk '{print $3}'`
+if [[ $checkOS = "8" ]]; then
+    userParams="/etc/zabbix/zabbix_agentd.d/userparams.conf"
+elif [[ $checkOS = "9" ]]; then
+    userParams="/etc/zabbix/zabbix_agentd.conf.d/userparams.conf"
+fi
 repo="https://raw.githubusercontent.com/imorrt/zabbix_installer/master"
 
 helpmenu()
@@ -26,12 +31,22 @@ Install()
 {
         echo -n "Please enter ip of your zabbix server: "
         read server
-                
-        cd /root/
-        wget http://repo.zabbix.com/zabbix/3.2/debian/pool/main/z/zabbix-release/zabbix-release_3.2-1+jessie_all.deb
-        dpkg -i zabbix-release_3.2-1+jessie_all.deb
-        apt-get update
-        apt-get install zabbix-agent
+
+        if [[ $checkOS = "8" ]]; then
+            cd /root/
+            wget http://repo.zabbix.com/zabbix/3.2/debian/pool/main/z/zabbix-release/zabbix-release_3.2-1+jessie_all.deb
+            dpkg -i zabbix-release_3.2-1+jessie_all.deb
+            apt-get update
+            apt-get install zabbix-agent
+
+        elif [[ $checkOS = "9" ]]; then
+            apt-get update
+            apt-get install zabbix-agent
+        else
+            exit
+        fi       
+
+
         
         hashIdentity=`openssl rand -hex 16`
         openssl rand -hex 32 > /etc/zabbix/zabbix_agent.psk
@@ -41,8 +56,12 @@ Install()
         chown zabbix:zabbix $pathScripts
 
         echo -n > $pathConf
-        echo "PidFile=/var/run/zabbix/zabbix_agentd.pid" >> $pathConf
-        echo "LogFile=/var/log/zabbix/zabbix_agentd.log" >> $pathConf
+        echo "PidFile=lzabbix_agentd.pid" >> $pathConf
+        if [[ $checkOS = "8" ]]; then
+            echo "LogFile=/var/log/zabbix/zabbix_agentd.log" >> $pathConf
+        elif [[ $checkOS = "9" ]]; then
+            echo "LogFile=/var/log/zabbix-agent/zabbix_agentd.log" >> $pathConf
+        fi
         echo "EnableRemoteCommands=1" >> $pathConf
         echo "Server=$server" >> $pathConf
         echo "Timeout=30" >> $pathConf
