@@ -56,7 +56,7 @@ Install()
         chown zabbix:zabbix $pathScripts
 
         echo -n > $pathConf
-        echo "PidFile=lzabbix_agentd.pid" >> $pathConf
+        echo "PidFile=/var/run/zabbix/zabbix_agentd.pid" >> $pathConf
         if [[ $checkOS = "8" ]]; then
             echo "LogFile=/var/log/zabbix/zabbix_agentd.log" >> $pathConf
         elif [[ $checkOS = "9" ]]; then
