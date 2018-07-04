@@ -336,7 +336,7 @@ do
       shift;;
             
     -x|--postfix)
-      RabbitMQ
+      Postfix
       shift;;
 
     -i|--install)
