@@ -171,7 +171,9 @@ WithApache()
 {
     a2enmod status
 cat << EOF > /etc/apache2/mods-available/status.conf
-<IfModule mod_status.c> 
+<IfModule mod_status.c>
+    Listen 8001
+    ExtendedStatus On 
     <Location /server-status>
             SetHandler server-status
             Allow from 127.0.0.1 ::1
