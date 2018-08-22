@@ -1,16 +1,4 @@
 #! /bin/bash
-#
-# Name: zapache
-#
-# Checks Apache activity.
-#
-# Author: Alejandro Michavila
-# Modified for Scoreboard Values: Murat Koc, murat@profelis.com.tr
-# Modified for using also as external script: Murat Koc, murat@profelis.com.tr
-# Modified for outputting usage or ZBX_NOTSUPPORTED: Alejandro Michavila
-#
-# Version: 1.4
-#
  
 zapachever="1.4"
 rval=0
