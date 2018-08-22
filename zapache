@@ -47,11 +47,11 @@ function usage()
  
 if [[ $# ==  1 ]];then
     #Agent Mode
-    VAR=$(wget --quiet -O - http://localhost/server-status?auto)
+    VAR=$(wget --quiet -O - http://localhost:8001/server-status?auto)
     CASE_VALUE=$1
 elif [[ $# == 2 ]];then
     #External Script Mode
-    VAR=$(wget --quiet -O - http://$1/server-status?auto)
+    VAR=$(wget --quiet -O - http://$1:8001/server-status?auto)
     CASE_VALUE=$2
 else
     #No Parameter
